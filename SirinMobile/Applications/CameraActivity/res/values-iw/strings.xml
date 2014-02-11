@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">מצלמה</string>
+    <string name="camera_exit_button_text">סגור</string>
+    <string name="camera_settings_button_text">סיום</string>
+    <string name="camera_settings_flash_off">פלאש כבוי</string>
+    <string name="camera_settings_flash_auto">פלאש אוטומטי</string>
+    <string name="camera_settings_flash_on">פלאש פעיל</string>
+    <string name="camera_settings_wb_auto">אוטומטי</string>
+    <string name="camera_settings_wb_incandescent">נורה להט</string>
+    <string name="camera_settings_wb_fluorescent">פלורוסנט</string>
+    <string name="camera_settings_wb_daylight">אור יום</string>
+    <string name="camera_settings_wb_cloudy">מעונן</string>
+    <string name="camera_settings_wb_bw">שחור לבן</string>
+    <string name="camera_settings_cam_front">מצלמה קדמית</string>
+    <string name="camera_settings_cam_back">מצלמה אחורית</string>
+    <string name="camera_settings_lamp_on">תאורה פעילה</string>
+    <string name="camera_settings_lamp_off">תאורה כבויה</string>
+    <string name="sd_low_space_text"> (SD) אין די מקום פנוי בכרטיס הזיכרון</string>
+    <string name="camera_could_not_focus">לא יכול להתמקד</string>
+    <string name="camera_video_saved_to">וידיאו נשמר ל: </string>
+    
+    <string name="sd_low_space_text"> אין מספיק מקום בכרטיס ה- SD. פנה מקום אחסון.</string>
+    
+</resources>

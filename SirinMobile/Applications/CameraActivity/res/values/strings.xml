@@ -1,0 +1,26 @@
+<resources>
+
+    <string name="app_name">UIUCamera</string>
+    <string name="camera_exit_button_text">Close</string>
+    <string name="camera_settings_button_text">Done</string>
+    <string name="camera_settings_flash_off">Off</string>
+    <string name="camera_settings_flash_auto">Auto</string>
+    <string name="camera_settings_flash_on">On</string>
+    <string name="camera_settings_flash_off">Off</string>
+    <string name="camera_settings_wb_auto">Auto</string>
+    <string name="camera_settings_wb_incandescent">Incandescent</string>
+    <string name="camera_settings_wb_fluorescent">Fluorescent</string>
+    <string name="camera_settings_wb_daylight">Daylight</string>
+    <string name="camera_settings_wb_cloudy">Cloudy</string>
+    <string name="camera_settings_wb_bw">Black &amp; White</string>
+    <string name="camera_settings_cam_front">Front</string>
+    <string name="camera_settings_cam_back">Back</string>
+    <string name="camera_settings_lamp_on">On</string>
+    <string name="camera_settings_lamp_off">Off</string>
+    <string name="camera_could_not_focus">could not focus</string>
+    <string name="camera_video_saved_to">video saved to: </string>
+    
+    <string name="sd_low_space_text">The SD card does not have enough space.\nPlease release some storage.</string>
+    
+
+</resources>

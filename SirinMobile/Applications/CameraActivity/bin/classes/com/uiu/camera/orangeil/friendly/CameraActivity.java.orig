@@ -1,0 +1,1352 @@
+package com.uiu.camera;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+import com.uiu.camera.util.CameraFunctions;
+import com.uiu.camera.util.CameraSeekBar;
+import com.uiu.camera.util.SettingsAdapter;
+import com.uiu.util.SoundManager;
+import com.uiu.util.SoundManager.Sounds;
+
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.PixelFormat;
+import android.graphics.PointF;
+import android.graphics.Rect;
+import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.hardware.Camera;
+import android.hardware.Camera.Parameters;
+import android.hardware.Camera.PreviewCallback;
+import android.hardware.Camera.Size;
+import android.hardware.SensorManager;
+import android.media.CamcorderProfile;
+import android.media.ExifInterface;
+import android.media.FaceDetector;
+import android.media.MediaRecorder;
+import android.media.FaceDetector.Face;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
+import android.provider.MediaStore;
+import android.util.Log;
+import android.util.TypedValue;
+import android.view.MotionEvent;
+import android.view.OrientationEventListener;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
+import android.view.ViewGroup.MarginLayoutParams;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
+import android.view.animation.TranslateAnimation;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.ScrollView;
+import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.TextView;
+import android.widget.Toast;
+
+public class CameraActivity extends Activity implements SurfaceHolder.Callback,
+		OnClickListener
+{
+
+<<<<<<< HEAD
+	private static final String TAG = CameraActivity.class.getSimpleName();
+	boolean cameraPresnt;
+	private ProgressDialog mDialogSavingImage;
+	private Button mButtonTakePicture, mButtonZoom, mButtonMediaRecording, mButtonColorEffect, mButtonFocus, mButtonResolution, mButtonSize;
+	private RelativeLayout mButtonExit, mButtonFlash, mButtonWhiteBlanace, mButtonFrontBackCamera;
+	RelativeLayout mButtonSettings;
+	RelativeLayout recordingTimeBack;
+	ImageView cameraButton, cameraImage, videoImage, previewView, previewPicView, flashImage, wbImage, frontBackImage, recordCircle, seekBarImage;
+	private TextView exitText;
+	private TextView settingsText;
+	private TextView recordingTime;
+	private CameraSeekBar seekBar;
+	private int padding;
+	private Drawable recordThumb;
+	private Drawable takePictureThumb;
+	private Drawable stopRecordingThumb;
+	private Drawable cameraButtonFeedBack;
+	private boolean inSettingsMode;
+	private SurfaceView mSurfaceView;
+	private SurfaceHolder mSurfaceHolder;
+	public CameraFunctions funcs;
+	public boolean cameraSettingsMenuVisible;
+	private ListView listView;
+	private ListView list;
+	private OrientationEventListener mOrientationEventListener;
+	private int mOrientation = -1;
+	private AnimationList animations;
+	private int SettingsType = -1;
+	private int recordingSeconds = 0;
+	private int recordingMinutes = 0;
+	private Handler mHandler = new Handler();
+	private boolean mSurfaceCreated;
+
+	private final static int FLASH_SETTINGS = 0;
+	private final static int WB_SETTINGS = 1;
+	private final static int SWITCH_CAMERA_SETTINGS = 2;
+	private static final int ORIENTATION_PORTRAIT_NORMAL = 1;
+	private static final int ORIENTATION_PORTRAIT_INVERTED = 2;
+	private static final int ORIENTATION_LANDSCAPE_NORMAL = 3;
+	private static final int ORIENTATION_LANDSCAPE_INVERTED = 4;
+
+	private static final int[][] settingsDrawables = {
+=======
+	private static final String			TAG								= CameraActivity.class
+																				.getSimpleName();
+	boolean								cameraPresnt;
+	private ProgressDialog				mDialogSavingImage;
+	private Button						mButtonTakePicture, mButtonZoom,
+			mButtonMediaRecording, mButtonColorEffect, mButtonFocus,
+			mButtonResolution, mButtonSize;
+	private RelativeLayout				mButtonExit, mButtonFlash,
+			mButtonWhiteBlanace, mButtonFrontBackCamera;
+	RelativeLayout						mButtonSettings;
+	RelativeLayout						recordingTimeBack;
+	ImageView							cameraButton, cameraImage, videoImage,
+			previewView, previewPicView, flashImage, wbImage, frontBackImage, recordCircle;
+	private TextView					exitText;
+	private TextView					settingsText;
+	private TextView					recordingTime;
+	private CameraSeekBar				seekBar;
+	private int							padding;
+	private Drawable					recordThumb;
+	private Drawable					takePictureThumb;
+	private Drawable					stopRecordingThumb;
+	private Drawable					cameraButtonFeedBack;
+	private boolean						inSettingsMode;
+	private SurfaceView					mSurfaceView;
+	private SurfaceHolder				mSurfaceHolder;
+	public CameraFunctions				funcs;
+	public boolean						cameraSettingsMenuVisible;
+	private ListView					listView;
+	private ListView					list;
+	private OrientationEventListener	mOrientationEventListener;
+	private int							mOrientation					= -1;
+	private AnimationList				animations;
+	private int							SettingsType					= -1;
+	private int recordingSeconds = 0;
+	private int recordingMinutes = 0;
+	private Handler mHandler = new Handler();
+	
+	
+	private final static int			FLASH_SETTINGS					= 0;
+	private final static int			WB_SETTINGS						= 1;
+	private final static int			SWITCH_CAMERA_SETTINGS			= 2;
+	private static final int			ORIENTATION_PORTRAIT_NORMAL		= 1;
+	private static final int			ORIENTATION_PORTRAIT_INVERTED	= 2;
+	private static final int			ORIENTATION_LANDSCAPE_NORMAL	= 3;
+	private static final int			ORIENTATION_LANDSCAPE_INVERTED	= 4;
+
+	private static final int[][]		settingsDrawables				= {
+>>>>>>> 3ad3a462bfb0de81f0f8b6dcac813000faea7568
+			{ R.drawable.flash_off, R.drawable.flash_autp, R.drawable.flash_on },
+			{ R.drawable.wb_auto, R.drawable.wb_incandescent,
+			R.drawable.wb_fluorescent, R.drawable.wb_daylight,
+			R.drawable.wb_cloudy, R.drawable.wb_black_white },
+			{ R.drawable.camera_rear, R.drawable.camera_front }		};
+
+	public void onCreate(Bundle icicle)
+	{
+		super.onCreate(icicle);
+		doWindowOperation();
+		setContentView(R.layout.camera);
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
+				| ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+		cameraPresnt = this.getPackageManager().hasSystemFeature(
+				PackageManager.FEATURE_CAMERA_FLASH);
+		/*
+		 * Animation rotateAnim = AnimationUtils.loadAnimation(this,
+		 * R.anim.rotation); LayoutAnimationController animController = new
+		 * LayoutAnimationController(rotateAnim, 0); FrameLayout layout =
+		 * (FrameLayout)findViewById(R.id.list_layout);
+		 * layout.setLayoutAnimation(animController);
+		 */
+
+		initComponents();
+
+	}
+
+	public void startGalleryIntent()
+	{
+		Intent intent = new Intent();
+		intent.setClassName(messageDispatcher.GALLERY_PACKAGE,
+				messageDispatcher.GALLERY_PACKAGE + ".activities.PhotoGridActivity");
+		intent.putExtra("fromCamera", true);
+		startActivity(intent);
+	}
+
+	/**
+	 * Set window flags
+	 */
+	private void doWindowOperation()
+	{
+		getWindow().setFormat(PixelFormat.TRANSLUCENT);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+				WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+	}
+
+	/**
+	 * Initialize components
+	 */
+	private void initComponents()
+	{
+		animations = new AnimationList(getBaseContext());
+		recordingTimeBack = (RelativeLayout)findViewById(R.id.recording_time_background);
+		recordingTime = (TextView)findViewById(R.id.recording_time);
+		recordCircle = (ImageView)findViewById(R.id.recording_circle);
+		listView = (ListView) findViewById(R.id.settings_list);
+		list = (ListView) findViewById(R.id.settings_list);
+		list.setOnItemClickListener(settingsListListener);
+		seekBarImage = (ImageView) findViewById(R.id.seekbar_image);
+		exitText = (TextView) findViewById(R.id.exit_button_text);
+		exitText.setTypeface(CameraApplication.segoeui);
+		padding = Math.round(TypedValue.applyDimension(
+				TypedValue.COMPLEX_UNIT_DIP, 38, getResources()
+						.getDisplayMetrics()));
+		stopRecordingThumb = getResources().getDrawable(
+				R.drawable.stop_button_icon);
+		stopRecordingThumb.setBounds(new Rect(0, 0, stopRecordingThumb
+				.getIntrinsicWidth(), stopRecordingThumb.getIntrinsicHeight()));
+		cameraButtonFeedBack = getResources().getDrawable(
+				R.drawable.camera_button_feedback);
+		cameraButtonFeedBack
+				.setBounds(new Rect(0, 0, cameraButtonFeedBack
+						.getIntrinsicWidth(), cameraButtonFeedBack
+						.getIntrinsicHeight()));
+		takePictureThumb = getResources().getDrawable(
+				R.drawable.camera_button_icon);
+		takePictureThumb.setBounds(new Rect(0, 0, takePictureThumb
+				.getIntrinsicWidth(), takePictureThumb.getIntrinsicHeight()));
+		recordThumb = getResources().getDrawable(R.drawable.red_camera_button);
+		recordThumb.setBounds(new Rect(0, 0, recordThumb.getIntrinsicWidth(),
+				recordThumb.getIntrinsicHeight()));
+		seekBar = (CameraSeekBar) findViewById(R.id.seek_bar);
+		mSurfaceView = (SurfaceView) findViewById(R.id.camera_surface);
+	//	mButtonTakePicture = (Button) findViewById(R.id.shoot_photo_camera);
+		mButtonFlash = (RelativeLayout) findViewById(R.id.flash_button);
+<<<<<<< HEAD
+=======
+	//	mButtonZoom = (Button) findViewById(R.id.zoom_in_camera);
+	//	mButtonMediaRecording = (Button) findViewById(R.id.camera_button_media_recording);
+	//	mButtonColorEffect = (Button) findViewById(R.id.camera_button_color_effect);
+	//	mButtonFocus = (Button) findViewById(R.id.camera_button_focus_mode);
+>>>>>>> 3ad3a462bfb0de81f0f8b6dcac813000faea7568
+		mButtonWhiteBlanace = (RelativeLayout) findViewById(R.id.brightness_button);
+		mButtonFrontBackCamera = (RelativeLayout) findViewById(R.id.camera_direction_button);
+		mButtonResolution = (Button) findViewById(R.id.camera_button_resolution);
+	//	mButtonSize = (Button) findViewById(R.id.camera_button_size_mode);
+		mButtonExit = (RelativeLayout) findViewById(R.id.exit_button);
+		mButtonSettings = (RelativeLayout) findViewById(R.id.settings_button);
+		settingsText = (TextView) findViewById(R.id.settings_button_text);
+		settingsText.setTypeface(CameraApplication.segoeui);
+		cameraImage = (ImageView) findViewById(R.id.camera_image);
+		videoImage = (ImageView) findViewById(R.id.video_image);
+		mSurfaceCreated = false;
+		previewView = (ImageView) findViewById(R.id.preview_view);
+		previewView.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v)
+			{
+				startGalleryIntent();
+			}
+		});
+		previewPicView = (ImageView) findViewById(R.id.preview_picture);
+		flashImage = (ImageView) findViewById(R.id.flash_button_image);
+		wbImage = (ImageView) findViewById(R.id.brightness_button_image);
+		frontBackImage = (ImageView) findViewById(R.id.camera_direction_image);
+
+	
+		mButtonFrontBackCamera.setOnClickListener(this);
+		mButtonWhiteBlanace.setOnClickListener(this);
+		//mButtonTakePicture.setOnClickListener(this);
+		mButtonFlash.setOnClickListener(this);
+	//	mButtonZoom.setOnClickListener(this);
+	//	mButtonMediaRecording.setOnClickListener(this);
+	//	mButtonColorEffect.setOnClickListener(this);
+	//	mButtonFocus.setOnClickListener(this);
+	//	mButtonWhiteBlanace.setOnClickListener(this);
+		mButtonFrontBackCamera.setOnClickListener(this);
+		mButtonResolution.setOnClickListener(this);
+	//	mButtonSize.setOnClickListener(this);
+
+		mButtonFlash.setOnClickListener(this);
+		mButtonExit.setOnClickListener(this);
+		mButtonSettings.setOnClickListener(this);
+
+		mSurfaceHolder = mSurfaceView.getHolder();
+		mSurfaceHolder.addCallback(this);
+		mSurfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+		funcs = new CameraFunctions(CameraActivity.this, mSurfaceView,
+				mSurfaceHolder);
+		inSettingsMode = false;
+		seekBar.setOnSeekBarChangeListener(mSeekBarListener);
+
+		/*
+		 * seekBar.setOnTouchListener(new OnTouchListener() {
+		 * 
+		 * @Override public boolean onTouch(View v, MotionEvent event) { if
+		 * (event.getAction() == MotionEvent.ACTION_MOVE) { changedPosition =
+		 * true; Log.d(TAG, "Moved , process data, Moved to :" +
+		 * seekBar.getProgress()); seekBar.setProgress(seekBar.getProgress());
+		 * return false; } else if (event.getAction() ==
+		 * MotionEvent.ACTION_DOWN) {
+		 * 
+		 * if (seekBar.getProgress() > seekBar.getMax() - 10 ) {
+		 * seekBar.setProgress(seekBar.getMax()); }
+		 * 
+		 * } else if (event.getAction() == MotionEvent.ACTION_UP) { if
+		 * (!changedPosition) { if (seekBar.getProgress() == 0) {
+		 * seekBar.setThumb(cameraButtonFeedBack); takePicture();
+		 * 
+		 * } else { if (mIsRecording) { seekBar.setThumb(stopRecordingThumb); }
+		 * else { seekBar.setThumb(recordThumb); }
+		 * Toast.makeText(getBaseContext(), "I'm filming! seriously!",
+		 * Long.SIZE) .show(); // startStopFilming(); } } else { changedPosition
+		 * = false;
+		 * 
+		 * }
+		 * 
+		 * } //Log.d(TAG, "Touched , Progress :" + seekBar.getProgress());
+		 * return true; } });
+		 */
+	}
+
+<<<<<<< HEAD
+	int seekBarlocation = 0;
+
+	OnSeekBarChangeListener mSeekBarListener = new OnSeekBarChangeListener() {
+
+		@Override
+		public void onStopTrackingTouch(SeekBar seekBar)
+		{
+			if (changedPosition)
+			{
+				if (seekBar.getProgress() > seekBar.getMax() / 2)
+				{
+					seekBarImage.setImageDrawable(recordThumb);
+					seekBar.setPadding(padding, 0, padding, 0);
+					seekBar.setProgress(seekBar.getMax());
+				}
+				else
+				{
+					seekBarImage.setImageDrawable(takePictureThumb);
+					seekBar.setPadding(padding, 0, padding, 0);
+					seekBar.setProgress(0);
+				}
+				changedPosition = false;
+			}
+			else
+			{
+				if (seekBar.getProgress() < 15)
+				{
+					seekBarImage.setImageDrawable(cameraButtonFeedBack);
+					takePicture();
+
+				}
+				else if (seekBar.getProgress() > 80)
+				{
+					if (!funcs.mIsRecording)
+					{
+						seekBarImage.setImageDrawable(stopRecordingThumb);
+					}
+					else
+					{
+						seekBarImage.setImageDrawable(recordThumb);
+					}
+					seekBar.setProgress(seekBar.getMax() - 1);
+					Toast.makeText(getBaseContext(), "I'm filming! seriously!", Long.SIZE).show();
+					startStopFilming();
+				}
+			}
+			Log.v(TAG, "stopped Tracking touch at: " + seekBar.getProgress());
+
+		}
+
+		@Override
+		public void onStartTrackingTouch(SeekBar seekBar)
+		{
+			// seekBarlocation =
+			// seekBar.getProgress();
+			Log.v(TAG, "started Tracking touch at: " + seekBar.getProgress());
+
+		}
+
+		@Override
+		public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
+		{
+			MarginLayoutParams params = (MarginLayoutParams) seekBarImage.getLayoutParams();
+			// Sets the margins of the imageview, making it move to a specific location on the screen
+			params.setMargins(progress, 0, 0, 0);
+			seekBarImage.setLayoutParams(params);
+			if (Math.abs(seekBarlocation - progress) > 10)
+				changedPosition = true;
+			Log.v(TAG, "progress changed at: " + progress + " from user: " + fromUser);
+
+		}
+	};
+=======
+	int						seekBarlocation		= 0;
+
+	OnSeekBarChangeListener	mSeekBarListener	= new OnSeekBarChangeListener() {
+
+													@Override
+													public void onStopTrackingTouch(
+															SeekBar seekBar)
+													{
+														if (changedPosition)
+														{
+															if (seekBar
+																	.getProgress() > seekBar
+																	.getMax() / 2)
+															{
+																seekBar.setThumb(recordThumb);
+																seekBar.setPadding(
+																		padding,
+																		0,
+																		padding,
+																		0);
+																seekBar.setProgress(seekBar
+																		.getMax());
+															} else
+															{
+																seekBar.setThumb(takePictureThumb);
+																seekBar.setPadding(
+																		padding,
+																		0,
+																		padding,
+																		0);
+																seekBar.setProgress(0);
+															}
+															changedPosition = false;
+														} else
+														{
+															if (seekBar
+																	.getProgress() < 15)
+															{
+																seekBar.setThumb(cameraButtonFeedBack);
+																takePicture();
+
+															} else if (seekBar
+																	.getProgress() > 80)
+															{
+																if (!funcs.mIsRecording)
+																{
+																	seekBar.setThumb(stopRecordingThumb);
+																} else
+																{
+																	seekBar.setThumb(recordThumb);
+																}
+																seekBar.setProgress(seekBar
+																		.getMax() - 1);
+																Toast.makeText(
+																		getBaseContext(),
+																		"I'm filming! seriously!",
+																		Long.SIZE)
+																		.show();
+																startStopFilming();
+															}
+														}
+														Log.v(TAG,
+																"stopped Tracking touch at: "
+																		+ seekBar
+																				.getProgress());
+
+													}
+
+													@Override
+													public void onStartTrackingTouch(
+															SeekBar seekBar)
+													{
+														// seekBarlocation =
+														// seekBar.getProgress();
+														Log.v(TAG,
+																"started Tracking touch at: "
+																		+ seekBar
+																				.getProgress());
+
+													}
+
+													@Override
+													public void onProgressChanged(
+															SeekBar seekBar,
+															int progress,
+															boolean fromUser)
+													{
+														if (Math.abs(seekBarlocation
+																- progress) > 10)
+															changedPosition = true;
+														Log.v(TAG,
+																"progress changed at: "
+																		+ progress
+																		+ " from user: "
+																		+ fromUser);
+
+													}
+												};
+>>>>>>> 3ad3a462bfb0de81f0f8b6dcac813000faea7568
+
+	@Override
+	protected void onStart()
+	{
+		populatePreview();
+		cameraSettingsMenuVisible = false;
+		super.onStart();
+	}
+
+	static boolean	changedPosition	= false;
+
+	@Override
+	public void onResume()
+	{
+		super.onResume();
+
+		if (funcs.mCamera == null)
+		{
+			funcs.startPreview();
+		}
+
+		if (mOrientationEventListener == null)
+		{
+			mOrientationEventListener = new OrientationEventListener(this,
+					SensorManager.SENSOR_DELAY_NORMAL) {
+
+				@Override
+				public void onOrientationChanged(int orientation)
+				{
+
+					// determine our orientation based on sensor response
+					int lastOrientation = mOrientation;
+
+					if (orientation >= 315 || orientation < 45)
+					{
+						if (mOrientation != ORIENTATION_PORTRAIT_NORMAL)
+						{
+							mOrientation = ORIENTATION_PORTRAIT_NORMAL;
+						}
+					} else if (orientation < 315 && orientation >= 225)
+					{
+						if (mOrientation != ORIENTATION_LANDSCAPE_NORMAL)
+						{
+							mOrientation = ORIENTATION_LANDSCAPE_NORMAL;
+						}
+					} else if (orientation < 225 && orientation >= 135)
+					{
+						if (mOrientation != ORIENTATION_PORTRAIT_INVERTED)
+						{
+							// mOrientation = ORIENTATION_PORTRAIT_INVERTED;
+						}
+					} else
+					{ // orientation <135 && orientation > 45
+						if (mOrientation != ORIENTATION_LANDSCAPE_INVERTED)
+						{
+							mOrientation = ORIENTATION_LANDSCAPE_INVERTED;
+						}
+					}
+
+					if (lastOrientation == ORIENTATION_PORTRAIT_NORMAL
+							&& mOrientation == ORIENTATION_LANDSCAPE_INVERTED)
+					{
+<<<<<<< HEAD
+						seekBarImage.startAnimation(animations.actionButtonPortToLandInv);
+						frontBackImage.startAnimation(animations.switchCameraButtonPortToLandInv);
+=======
+						frontBackImage
+								.startAnimation(animations.switchCameraButtonPortToLandInv);
+>>>>>>> 3ad3a462bfb0de81f0f8b6dcac813000faea7568
+						wbImage.startAnimation(animations.wbButtonPortToLandInv);
+						flashImage
+								.startAnimation(animations.flashButtonPortToLandInv);
+						exitText.startAnimation(animations.closeButtonPortToLandInv);
+						if (inSettingsMode)
+							settingsText
+									.startAnimation(animations.settingsButtonPortToLandInv);
+						cameraImage
+								.startAnimation(animations.seekbarIconsPortToLandInv);
+						videoImage
+								.startAnimation(animations.seekbarIconsPortToLandInv);
+						previewView
+								.startAnimation(animations.previewBorderPortToLandInv);
+						previewPicView
+								.startAnimation(animations.imagePreviewPortToLandInv);
+					}
+
+					if (lastOrientation == ORIENTATION_PORTRAIT_NORMAL
+							&& mOrientation == ORIENTATION_LANDSCAPE_NORMAL)
+					{
+<<<<<<< HEAD
+						seekBarImage.startAnimation(animations.actionButtonPortToLand);
+						frontBackImage.startAnimation(animations.switchCameraButtonPortToLand);
+=======
+						frontBackImage
+								.startAnimation(animations.switchCameraButtonPortToLand);
+>>>>>>> 3ad3a462bfb0de81f0f8b6dcac813000faea7568
+						wbImage.startAnimation(animations.wbButtonPortToLand);
+						flashImage
+								.startAnimation(animations.flashButtonPortToLand);
+						exitText.startAnimation(animations.closeButtonPortToLand);
+						if (inSettingsMode)
+							settingsText
+									.startAnimation(animations.settingsButtonPortToLand);
+						cameraImage
+								.startAnimation(animations.seekbarIconsPortToLand);
+						videoImage
+								.startAnimation(animations.seekbarIconsPortToLand);
+						previewView
+								.startAnimation(animations.previewBorderPortToLand);
+						previewPicView
+								.startAnimation(animations.imagePreviewPortToLand);
+					}
+					if (lastOrientation == ORIENTATION_LANDSCAPE_NORMAL
+							&& mOrientation == ORIENTATION_PORTRAIT_NORMAL)
+					{
+<<<<<<< HEAD
+						seekBarImage.startAnimation(animations.actionButtonLandToPort);
+						frontBackImage.startAnimation(animations.switchCameraButtonLandToPort);
+=======
+						frontBackImage
+								.startAnimation(animations.switchCameraButtonLandToPort);
+>>>>>>> 3ad3a462bfb0de81f0f8b6dcac813000faea7568
+						wbImage.startAnimation(animations.wbButtonLandToPort);
+						flashImage
+								.startAnimation(animations.flashButtonLandToPort);
+						exitText.startAnimation(animations.closeButtonLandToPort);
+						if (inSettingsMode)
+							settingsText
+									.startAnimation(animations.settingsButtonLandToPort);
+						cameraImage
+								.startAnimation(animations.seekbarIconsLandToPort);
+						videoImage
+								.startAnimation(animations.seekbarIconsLandToPort);
+						previewView
+								.startAnimation(animations.previewBorderLandToPort);
+						previewPicView
+								.startAnimation(animations.imagePreviewLandToPort);
+					}
+					if (lastOrientation == ORIENTATION_LANDSCAPE_INVERTED
+							&& mOrientation == ORIENTATION_PORTRAIT_NORMAL)
+					{
+<<<<<<< HEAD
+						seekBarImage.startAnimation(animations.actionButtonLandInvToPort);
+						frontBackImage.startAnimation(animations.switchCameraButtonLandInvToPort);
+=======
+						frontBackImage
+								.startAnimation(animations.switchCameraButtonLandInvToPort);
+>>>>>>> 3ad3a462bfb0de81f0f8b6dcac813000faea7568
+						wbImage.startAnimation(animations.wbButtonLandInvToPort);
+						flashImage
+								.startAnimation(animations.flashButtonLandInvToPort);
+						exitText.startAnimation(animations.closeButtonLandInvToPort);
+						if (inSettingsMode)
+							settingsText
+									.startAnimation(animations.settingsButtonLandInvToPort);
+						cameraImage
+								.startAnimation(animations.seekbarIconsLandInvToPort);
+						videoImage
+								.startAnimation(animations.seekbarIconsLandInvToPort);
+						previewView
+								.startAnimation(animations.previewBorderLandInvToPort);
+						previewPicView
+								.startAnimation(animations.imagePreviewLandInvToPort);
+					}
+
+					if (lastOrientation != mOrientation)
+					{
+						// changeRotation(mOrientation, lastOrientation);
+					}
+				}
+			};
+		}
+		if (mOrientationEventListener.canDetectOrientation())
+		{
+			mOrientationEventListener.enable();
+		}
+
+		Log.i(TAG, "onResume");
+	}
+
+	@Override
+	public void onPause()
+	{
+		super.onPause();
+		mOrientationEventListener.disable();
+		if (funcs.mCamera != null)
+		{
+			funcs.stopPreview();
+		}
+
+		Log.i(TAG, "onPause");
+	}
+
+	@Override
+	public void onStop()
+	{
+		super.onStop();
+
+		if (funcs.mCamera != null)
+		{
+			funcs.stopPreview();
+			funcs.mCamera.release();
+			funcs.mCamera = null;
+		}
+
+		Log.i(TAG, "onStop");
+	}
+
+	@Override
+	public void onDestroy()
+	{
+		super.onDestroy();
+
+		if (funcs.mCamera != null)
+		{
+			funcs.stopPreview();
+			funcs.mCamera.release();
+		}
+
+		Log.i(TAG, "onDestroy");
+	}
+
+	public void setSettingsAdapter(int type)
+	{
+		SettingsType = type;
+		SettingsAdapter s = null;
+		;
+		switch (type)
+		{
+		case 0:
+			s = new SettingsAdapter(this, R.layout.settings_row_layout, type,
+					SettingsAdapter.flashSettingsText);
+		case 1:
+			s = new SettingsAdapter(this, R.layout.settings_row_layout, type,
+					SettingsAdapter.wbSettingsText);
+		case 2:
+			s = new SettingsAdapter(this, R.layout.settings_row_layout, type,
+					SettingsAdapter.switchCameraSettingsText);
+		}
+
+		list.setAdapter(s);
+
+	}
+
+<<<<<<< HEAD
+	OnItemClickListener settingsListListener = new OnItemClickListener() {
+
+		@Override
+		public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+		{
+			switch (SettingsType)
+			{
+				case 0:
+					funcs.changeFlashMode(position);
+					flashImage.setImageResource(settingsDrawables[SettingsType][position]);
+					break;
+				case 1:
+					funcs.changeWhiteBalanceMode(position);
+					wbImage.setImageResource(settingsDrawables[SettingsType][position]);
+					break;
+				case 2:
+					funcs.switchCamera(position);
+					frontBackImage.setImageResource(settingsDrawables[SettingsType][position]);
+					break;
+
+				// funcs.changeFocusMode();
+				// funcs.changeColorEffect();
+
+			}
+
+			list.setVisibility(ListView.GONE);
+			cameraSettingsMenuVisible = false;
+		}
+
+	};
+=======
+	OnItemClickListener	settingsListListener	= new OnItemClickListener() {
+
+													@Override
+													public void onItemClick(
+															AdapterView<?> parent,
+															View view,
+															int position,
+															long id)
+													{
+														switch (SettingsType)
+														{
+														case 0:
+															funcs.changeFlashMode(position);
+															flashImage
+																	.setImageResource(settingsDrawables[SettingsType][position]);
+															break;
+														case 1:
+															funcs.changeWhiteBalanceMode(position);
+															wbImage.setImageResource(settingsDrawables[SettingsType][position]);
+															break;
+														case 2:
+															funcs.switchCamera(position);
+															frontBackImage
+																	.setImageResource(settingsDrawables[SettingsType][position]);
+															break;
+
+														// funcs.changeFocusMode();
+														// funcs.changeColorEffect();
+
+														}
+
+														list.setVisibility(ListView.GONE);
+														cameraSettingsMenuVisible = false;
+													}
+
+												};
+>>>>>>> 3ad3a462bfb0de81f0f8b6dcac813000faea7568
+
+	public void populatePreview()
+	{
+		String[] projection = new String[] {
+				MediaStore.Images.ImageColumns._ID,
+				MediaStore.Images.ImageColumns.DATA,
+				MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME,
+				MediaStore.Images.ImageColumns.DATE_TAKEN,
+				MediaStore.Images.ImageColumns.MIME_TYPE };
+		final Cursor cursor = managedQuery(
+				MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null,
+				null, MediaStore.Images.ImageColumns.DATE_TAKEN + " DESC");
+
+		if (cursor == null)
+			return;
+
+		if (cursor.moveToFirst())
+		{
+			final ImageView imageView = (ImageView) findViewById(R.id.preview_picture);
+			String imageLocation = cursor.getString(1);
+
+			File imageFile = new File(imageLocation);
+			if (imageFile.exists())
+			{
+				BitmapFactory.Options options = new BitmapFactory.Options();
+				options.inSampleSize = 8;
+				Bitmap preview_bitmap = BitmapFactory.decodeFile(imageLocation,
+						options);
+				imageView.setImageBitmap(preview_bitmap);
+
+			}
+		}
+		cursor.close();
+	}
+
+<<<<<<< HEAD
+	Camera.PictureCallback mPictureCallback = new Camera.PictureCallback() {
+		public void onPictureTaken(final byte[] imageData, Camera c)
+		{
+			// this line throws a numberparseException in the front facing camera - incredible S
+			// final int rotation = c.getParameters().getInt("rotation");
+			final int rotation = 90;
+			if (imageData != null)
+			{
+				AsyncTask<Void, Void, Void> asyncImageSave = new AsyncTask<Void, Void, Void>() {
+
+					protected void onPreExecute()
+					{
+						mDialogSavingImage = ProgressDialog.show(CameraActivity.this, "Wait", "Saving picture...");
+					};
+
+					@Override
+					protected Void doInBackground(Void... params)
+					{
+						sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file:/" + Environment.getExternalStorageDirectory()
+								+ "/DCIM")));
+
+						funcs.StoreByteImage(CameraActivity.this, imageData, 50, "ImageName", rotation);
+
+						funcs.stopPreview();
+
+						return null;
+					}
+
+					protected void onPostExecute(Void result)
+					{
+						try
+						{
+							mDialogSavingImage.dismiss();
+							mDialogSavingImage = null;
+							funcs.retake();
+							populatePreview();
+						}
+						catch (Exception e)
+						{
+							Log.e(TAG, e.getMessage());
+						}
+					};
+				};
+
+				asyncImageSave.execute();
+			}
+		}
+	};
+=======
+	Camera.PictureCallback	mPictureCallback	= new Camera.PictureCallback() {
+													public void onPictureTaken(
+															final byte[] imageData,
+															Camera c)
+													{
+														final int rotation = c
+																.getParameters()
+																.getInt("rotation");
+														if (imageData != null)
+														{
+															AsyncTask<Void, Void, Void> asyncImageSave = new AsyncTask<Void, Void, Void>() {
+
+																protected void onPreExecute()
+																{
+																	mDialogSavingImage = ProgressDialog
+																			.show(CameraActivity.this,
+																					"Wait",
+																					"Saving picture...");
+																};
+
+																@Override
+																protected Void doInBackground(
+																		Void... params)
+																{
+																	sendBroadcast(new Intent(
+																			Intent.ACTION_MEDIA_MOUNTED,
+																			Uri.parse("file:/"
+																					+ Environment
+																							.getExternalStorageDirectory()
+																					+ "/DCIM")));
+
+																	funcs.StoreByteImage(
+																			CameraActivity.this,
+																			imageData,
+																			50,
+																			"ImageName",
+																			rotation);
+
+																	funcs.stopPreview();
+
+																	return null;
+																}
+
+																protected void onPostExecute(
+																		Void result)
+																{
+																	try
+																	{
+																		mDialogSavingImage
+																				.dismiss();
+																		mDialogSavingImage = null;
+
+																		funcs.retake();
+																		populatePreview();
+
+																	}
+
+																	catch (Exception e)
+																	{
+																		Log.e(TAG,
+																				e.getMessage());
+																	}
+																};
+															};
+
+															asyncImageSave
+																	.execute();
+														}
+													}
+												};
+>>>>>>> 3ad3a462bfb0de81f0f8b6dcac813000faea7568
+
+	/**
+	 * Surface first created
+	 */
+	public void surfaceCreated(SurfaceHolder holder)
+	{
+		mSurfaceCreated = true;
+	}
+
+	/**
+	 * Surface changed
+	 */
+	public void surfaceChanged(SurfaceHolder holder, int format, int width,
+			int height)
+	{
+		funcs.changeSurface(holder);
+	}
+
+	/**
+	 * Surface destroyed
+	 */
+	public void surfaceDestroyed(SurfaceHolder arg0)
+	{
+		mSurfaceCreated = false;
+		funcs.destroySurface();
+	}
+
+	public void takePicture()
+	{
+<<<<<<< HEAD
+		if (mSurfaceCreated)
+		{
+			funcs.mCamera.autoFocus(new Camera.AutoFocusCallback() {
+				Camera.ShutterCallback shutterCallback = new Camera.ShutterCallback() {
+					public void onShutter()
+					{
+
+					}
+				};
+
+				public void onAutoFocus(boolean success, Camera camera)
+				{
+					camera.takePicture(shutterCallback, mPictureCallback, mPictureCallback);
+					seekBarImage.setImageDrawable(takePictureThumb);
+				}
+			});
+		}
+=======
+		funcs.mCamera.autoFocus(new Camera.AutoFocusCallback() {
+			Camera.ShutterCallback	shutterCallback	= new Camera.ShutterCallback() {
+														public void onShutter()
+														{
+															
+														}
+													};
+
+			public void onAutoFocus(boolean success, Camera camera)
+			{
+				camera.takePicture(shutterCallback, mPictureCallback,
+						mPictureCallback);
+				seekBar.setThumb(takePictureThumb);
+			}
+		});
+>>>>>>> 3ad3a462bfb0de81f0f8b6dcac813000faea7568
+	}
+
+	public void startStopFilming()
+	{
+		if (funcs.mIsRecording == true)
+		{
+			mHandler.removeCallbacks(updateRecordingTime);
+			recordingTimeBack.setVisibility(RelativeLayout.GONE);
+			recordCircle.clearAnimation();
+			
+			recordingMinutes = 0;
+			recordingSeconds = 0;
+			
+			Log.v(TAG, "Stopping camera");
+			try
+			{
+
+				// stop the recording
+				// funcs.mMediaRecoder.release();
+
+				funcs.mMediaRecoder.stop();
+				Log.v(TAG, "STOPPED");
+			} catch (Exception e)
+			{
+				e.printStackTrace();
+				Log.e(TAG, "ERROR stopping Camera");
+				funcs.releaseMediaRecorder();
+			}
+
+			Log.v(TAG, "Camera stopped");
+
+			// release the MediaRecorder object
+			funcs.releaseMediaRecorder();
+
+			Toast.makeText(
+					CameraActivity.this,
+					"video saved to: "
+							+ Environment.getExternalStorageDirectory()
+									.getPath() + "/", Toast.LENGTH_LONG).show();
+
+			// stopPreview();
+
+			// funcs.stopPreview();
+			funcs.mPreviewRunning = false;
+			// mCamera.release();
+			// funcs.mCamera = null;
+
+			funcs.retake();
+		}
+
+		else
+		{
+			recordCircle.startAnimation(animations.recordCircleAnimationFadeOut);
+			recordingTimeBack.setVisibility(RelativeLayout.VISIBLE);
+			mHandler.post(updateRecordingTime);
+			funcs.startMediaRecording();
+			// mButtonMediaRecording.setText("stop record");
+		}
+	}
+
+	/**
+	 * Buttons OnClick handling
+	 */
+	public void onClick(View v)
+	{
+		RelativeLayout bottomRow = (RelativeLayout) findViewById(R.id.bottom_row);
+		switch (v.getId())
+		{
+<<<<<<< HEAD
+			
+			case R.id.exit_button:
+			{
+				finish();
+				break;
+			}
+=======
+	/*	case R.id.shoot_photo_camera:
+		{
+			takePicture();
+			break;
+		}
+
+		case R.id.flash_mode_camera:
+		{
+			// funcs.changeFlashMode();
+			break;
+		}
+
+		case R.id.zoom_in_camera:
+		{
+			funcs.zoomView(3);
+			break;
+		}
+
+		case R.id.camera_button_media_recording:
+		{
+			startStopFilming();
+			break;
+		}
+
+		case R.id.camera_button_color_effect:
+		{
+			// funcs.changeColorEffect();
+			break;
+		}
+
+		case R.id.camera_button_focus_mode:
+		{
+			// funcs.changeFocusMode();
+			break;
+		}
+
+		case R.id.camera_button_white_balance_mode:
+		{
+			// funcs.changeWhiteBalanceMode();
+			break;
+		}
+
+		case R.id.camera_button_front_back_camera:
+		{
+			// funcs.switchCamera();
+			break;
+		}
+
+		case R.id.camera_button_resolution:
+		{
+			funcs.changePictureResolution();
+			break;
+		}
+
+		case R.id.camera_button_size_mode:
+		{
+			funcs.changePictureSize();
+			break;
+		}
+*/
+		case R.id.exit_button:
+		{
+			finish();
+			break;
+		}
+>>>>>>> 3ad3a462bfb0de81f0f8b6dcac813000faea7568
+
+		case R.id.settings_button:
+		{
+			if (!inSettingsMode)
+			{
+				inSettingsMode = true;
+				settingsText.setBackgroundColor(Color.TRANSPARENT);
+				settingsText.setText("Done");
+				mButtonExit.setVisibility(RelativeLayout.GONE);
+				mButtonFlash.setVisibility(RelativeLayout.VISIBLE);
+				mButtonFrontBackCamera.setVisibility(ImageButton.VISIBLE);
+				mButtonWhiteBlanace.setVisibility(ImageButton.VISIBLE);
+				bottomRow.setVisibility(RelativeLayout.GONE);
+
+			} else
+			{
+				inSettingsMode = false;
+				settingsText.setBackgroundResource(R.drawable.settings_icon);
+				settingsText.setText("");
+				mButtonFlash.setVisibility(RelativeLayout.GONE);
+				mButtonFrontBackCamera.setVisibility(ImageButton.GONE);
+				mButtonWhiteBlanace.setVisibility(ImageButton.GONE);
+				bottomRow.setVisibility(RelativeLayout.VISIBLE);
+				mButtonExit.setVisibility(mButtonExit.VISIBLE);
+				if (cameraSettingsMenuVisible)
+				{
+					list.setVisibility(ListView.GONE);
+					cameraSettingsMenuVisible = false;
+				}
+				bottomRow.setVisibility(RelativeLayout.VISIBLE);
+			}
+			break;
+		}
+		case R.id.flash_button:
+			bottomRow.setVisibility(RelativeLayout.GONE);
+			list.setBackgroundResource(R.drawable.drop_down_flash);
+			setSettingsAdapter(0);
+
+			/*
+			 * list.setAdapter(new ArrayAdapter<String>(getBaseContext(),
+			 * android.R.layout.simple_list_item_1, mStrings));
+			 */
+			list.setPadding(0, 0, 0, 0);
+			list.setVisibility(ListView.VISIBLE);
+			list.setCacheColorHint(Color.TRANSPARENT);
+			startListAnimation();
+			cameraSettingsMenuVisible = true;
+			break;
+		case R.id.brightness_button:
+			bottomRow.setVisibility(RelativeLayout.GONE);
+			list.setBackgroundResource(R.drawable.drop_down_wb);
+			setSettingsAdapter(1);
+
+			/*
+			 * list.setAdapter(new ArrayAdapter<String>(getBaseContext(),
+			 * android.R.layout.simple_list_item_1, mStrings));
+			 */
+			list.setPadding(0, 0, 0, 0);
+			list.setVisibility(ListView.VISIBLE);
+			list.setCacheColorHint(Color.TRANSPARENT);
+			startListAnimation();
+			cameraSettingsMenuVisible = true;
+			break;
+		case R.id.camera_direction_button:
+			bottomRow.setVisibility(RelativeLayout.GONE);
+			list.setBackgroundResource(R.drawable.drop_down_switch);
+			setSettingsAdapter(2);
+
+			/*
+			 * list.setAdapter(new ArrayAdapter<String>(getBaseContext(),
+			 * android.R.layout.simple_list_item_1, mStrings));
+			 */
+			list.setPadding(0, 0, 0, 0);
+			list.setCacheColorHint(Color.TRANSPARENT);
+			list.setVisibility(ListView.VISIBLE);
+			startListAnimation();
+			cameraSettingsMenuVisible = true;
+			break;
+		}
+	}
+
+	public void startListAnimation()
+	{
+		AnimationSet set = new AnimationSet(true);
+
+		Animation animation = new AlphaAnimation(0.0f, 1.0f);
+		animation.setDuration(50);
+		set.addAnimation(animation);
+		animation = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0.0f,
+				Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF,
+				-1.0f, Animation.RELATIVE_TO_SELF, 0.0f);
+		animation.setDuration(100);
+		set.addAnimation(animation);
+
+		LayoutAnimationController controller = new LayoutAnimationController(
+				set, 0.5f);
+		list.setLayoutAnimation(controller);
+	}
+
+	@Override
+	public void onConfigurationChanged(Configuration newConfig)
+	{
+		// TODO Auto-generated method stub
+		super.onConfigurationChanged(newConfig);
+	}
+	
+	Runnable updateRecordingTime = new Runnable() {
+		
+		@Override
+		public void run()
+		{
+			if( recordingSeconds > 10 && recordingMinutes > 10)
+				recordingTime.setText(recordingMinutes + ":" + recordingSeconds);
+			else if ( recordingSeconds > 10 && recordingMinutes < 10)
+				recordingTime.setText("0" + recordingMinutes + ":" + recordingSeconds);
+			else if ( recordingSeconds < 10 && recordingMinutes > 10)
+				recordingTime.setText(recordingMinutes + ":" + "0" + recordingSeconds);
+			else if ( recordingSeconds < 10 && recordingMinutes < 10)
+				recordingTime.setText("0" + recordingMinutes + ":" + "0" + recordingSeconds);
+			
+			recordingSeconds++;
+			if(recordingSeconds == 60)
+			{
+				recordingSeconds = 0;
+				recordingMinutes++;
+			}
+			mHandler.postDelayed(this, 1000);
+		}
+	};
+	
+	@Override
+	public void onBackPressed()
+	{
+		if (cameraSettingsMenuVisible)
+		{
+			RelativeLayout bottomRow = (RelativeLayout) findViewById(R.id.bottom_row);
+			list.setVisibility(ListView.GONE);
+			bottomRow.setVisibility(RelativeLayout.VISIBLE);
+			cameraSettingsMenuVisible = false;
+			return;
+		} else
+			super.onBackPressed();
+	}
+}

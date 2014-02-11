@@ -1,0 +1,783 @@
+package com.uiu.camera.util;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.PixelFormat;
+import android.hardware.Camera;
+import android.hardware.Camera.Parameters;
+import android.hardware.Camera.Size;
+import android.media.CamcorderProfile;
+import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnInfoListener;
+import android.media.MediaRecorder;
+import android.net.Uri;
+import android.os.Environment;
+import android.util.Log;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+import android.widget.Toast;
+
+import com.uiu.camera.CameraActivity;
+
+public class CameraFunctions
+{
+	private static final String TAG = CameraActivity.class.getSimpleName();
+	public Camera mCamera;
+	public Parameters mCameraParams;
+	public boolean mPreviewRunning = false;
+	public MediaRecorder mMediaRecoder;
+	public boolean mIsRecording = false;
+	List<Camera.Size>[] lists;
+	public Camera.Size currentSize;
+	private int colorMode = 0;
+	Context mContext;
+	public boolean bwImage = false;
+	public boolean isFront = false;
+	private SurfaceView mSurfaceView;
+	private SurfaceHolder mSurfaceHolder;
+
+	public CameraFunctions(Context context, SurfaceView mSurfaceView, SurfaceHolder mSurfaceHolder)
+	{
+		this.mContext = context;
+		this.mSurfaceView = mSurfaceView;
+		this.mSurfaceHolder = mSurfaceHolder;
+	}
+
+	/**
+	 * Start recording of videos
+	 */
+	public void startMediaRecording()
+	{
+		// Release the camera before recording
+		stopPreview();
+
+		if (prepareMediaRecorder() == false)
+		{
+			Toast.makeText(mContext, "Fail in prepareMediaRecorder()!\n - Ended -", Toast.LENGTH_LONG).show();
+			((Activity) mContext).finish();
+		}
+		else
+		{
+			mMediaRecoder.start();
+			mIsRecording = true;
+		}
+	}
+
+	/**
+	 * Preparing the media recording
+	 * 
+	 * @return
+	 */
+	private boolean prepareMediaRecorder()
+	{
+
+		mCamera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK);
+		mCamera.setDisplayOrientation(90);
+		/*
+		 * Camera.Parameters param = mCamera.getParameters(); param.set( "cam_mode", 1 ); mCamera.setParameters( param );
+		 */
+		mCamera.unlock();
+
+		mMediaRecoder = new MediaRecorder();
+
+		mMediaRecoder.setOnErrorListener(new MediaRecorder.OnErrorListener() {
+			@Override
+			public void onError(MediaRecorder mr, int what, int extra)
+			{
+				Log.i(TAG, "Error");
+			}
+		});
+
+		mMediaRecoder.setCamera(mCamera);
+
+		mMediaRecoder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
+		mMediaRecoder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+
+		mMediaRecoder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+		mMediaRecoder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+		mMediaRecoder.setVideoEncoder(MediaRecorder.VideoEncoder.H263);
+
+		mMediaRecoder.setVideoFrameRate(20);
+
+		// mMediaRecoder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
+
+		mMediaRecoder.setOutputFile(Environment.getExternalStorageDirectory().getPath() + "/" + UUID.randomUUID().toString() + ".3gp");
+
+		// Set max duration 10min
+		mMediaRecoder.setMaxDuration(600000);
+
+		// Set max file size 10MB
+		mMediaRecoder.setMaxFileSize(10000000);
+
+		mMediaRecoder.setPreviewDisplay(mSurfaceView.getHolder().getSurface());
+
+		try
+		{
+			mMediaRecoder.prepare();
+		}
+
+		catch (IllegalStateException e)
+		{
+			releaseMediaRecorder();
+			Log.v(TAG, "Crashed");
+			return false;
+		}
+
+		catch (IOException e)
+		{
+			releaseMediaRecorder();
+			Log.v(TAG, "Crashed");
+			return false;
+		}
+
+		return true;
+		/*
+		 * try { mCamera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK); mCamera.unlock(); mMediaRecoder = new MediaRecorder(); mMediaRecoder.setOnErrorListener(new
+		 * MediaRecorder.OnErrorListener() {
+		 * 
+		 * @Override public void onError(MediaRecorder mr, int what, int extra) { Log.i(TAG, "Error"); } });
+		 * 
+		 * mMediaRecoder.setCamera(mCamera); mMediaRecoder.setAudioSource(MediaRecorder.AudioSource.MIC); mMediaRecoder.setVideoSource(MediaRecorder.VideoSource.CAMERA); Log.i(TAG, "a");
+		 * 
+		 * mMediaRecoder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP); mMediaRecoder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
+		 * mMediaRecoder.setVideoEncoder(MediaRecorder.VideoEncoder.H263); Log.i(TAG, "b");
+		 * 
+		 * mMediaRecoder.setMaxDuration(600000); // set to 20000
+		 * 
+		 * //mMediaRecoder.setOutputFile(Environment.getExternalStorageDirectory().getPath() + "/" + UUID.randomUUID().toString() + ".mp4");
+		 * 
+		 * String uniqueOutFile = Environment.getExternalStorageDirectory().getPath() + "/" + + System.currentTimeMillis() + ".3gp"; File outFile = new File(uniqueOutFile); if (outFile.exists()) {
+		 * outFile.delete(); } mMediaRecoder.setOutputFile(uniqueOutFile); mMediaRecoder.setVideoFrameRate(40); // set to 20
+		 * 
+		 * Log.i(TAG, "c");
+		 * 
+		 * mMediaRecoder.setPreviewDisplay(mSurfaceHolder.getSurface()); mMediaRecoder.setMaxFileSize(10000000); // set to 50000 mMediaRecoder.prepare(); Log.i(TAG, "d");
+		 * 
+		 * mMediaRecoder.start(); Log.i(TAG, "e");
+		 * 
+		 * return true; } catch (IllegalStateException e) { Log.i(TAG, "f"); // Log.e(TAG, e.getMessage()); e.printStackTrace(); mCamera.lock(); return false; } catch (IOException e) { Log.i(TAG,
+		 * "g"); // Log.e(TAG, e.getMessage()); e.printStackTrace(); mCamera.lock(); return false; } catch (RuntimeException e) { Log.i(TAG, "h"); // Log.e(TAG, e.getMessage()); mCamera.lock(); return
+		 * false; }
+		 */
+
+	}
+
+	public void releaseMediaRecorder()
+	{
+		if (mMediaRecoder != null)
+		{
+			mCamera.stopPreview();
+			mCamera.setPreviewCallback(null);
+			mCamera.release();
+			mCamera = null;
+
+			// clear recorder configuration
+			mMediaRecoder.reset();
+
+			// release the recorder object
+			mMediaRecoder.release();
+			mMediaRecoder = null;
+
+			mIsRecording = false;
+
+			Log.d(TAG, "Media recording released!");
+		}
+	}
+
+	public void destroySurface()
+	{
+		if (mPreviewRunning && mCamera != null)
+		{
+			if (mCamera != null)
+			{
+				stopPreview();
+				mCamera.release();
+				mCamera = null;
+			}
+			mPreviewRunning = false;
+		}
+	}
+
+	public void startPreview()
+	{
+		if (!mPreviewRunning && mCamera != null)
+		{
+			mCamera.startPreview();
+			mPreviewRunning = true;
+		}
+	}
+
+	public void stopPreview()
+	{
+		if (mPreviewRunning && mCamera != null)
+		{
+			mCamera.stopPreview();
+			mPreviewRunning = false;
+			mCamera.release();
+			mCamera = null;
+		}
+	}
+
+	public void changeSurface(SurfaceHolder holder)
+	{
+		try
+		{
+			mCamera = Camera.open();
+			mCamera.setErrorCallback(errorListener);
+			mCameraParams = mCamera.getParameters();
+			setPictureSizeArrays();
+
+			List<Camera.Size> previewSizes = mCameraParams.getSupportedPreviewSizes();
+
+			mCameraParams.setPreviewSize(previewSizes.get(0).width, previewSizes.get(0).height);
+			mCameraParams.setPreviewSize(640, 480);
+			mCameraParams.setPictureSize(currentSize.width, currentSize.height);
+			mCameraParams.set("rotation", 90);
+			mCameraParams.setPictureFormat(PixelFormat.JPEG);
+			mCameraParams.set("flash-mode", "auto");
+			mCamera.setDisplayOrientation(90);
+
+			mCamera.setParameters(mCameraParams);
+			mCamera.setPreviewDisplay(holder);
+			// new
+			// mBackCamera.setPreviewCallback(mPreviewCallback);
+
+			startPreview();
+		}
+
+		catch (Exception e)
+		{
+			Log.d(TAG, "Cannot start preview", e);
+			((Activity) mContext).finish();
+		}
+
+		mPreviewRunning = true;
+	}
+
+	Camera.ErrorCallback errorListener = new Camera.ErrorCallback() {
+
+		@Override
+		public void onError(int error, Camera camera)
+		{
+			Log.e(TAG, "Camera ERROR: " + error);
+			if (mCamera != null)
+			{
+				stopPreview();
+				mCamera.release();
+
+			}
+
+		}
+	};
+
+	// change picure resolution (8mpx, 6mpx...)
+	public void changePictureResolution()
+	{
+		Camera.Size size = mCameraParams.getPictureSize();
+		for (int i = 0; i < lists.length; i++)
+		{
+			for (Camera.Size s : lists[i])
+			{
+				if (s.equals(size))
+				{
+					try
+					{
+						int index = (i + 1) % lists.length;
+						currentSize = lists[index].get(0);
+						mCameraParams.setPictureSize(currentSize.width, currentSize.height);
+						mCamera.setParameters(mCameraParams);
+
+						Toast.makeText(mContext, Math.ceil((double) currentSize.width * currentSize.height / (double) 1000000) + "Mpx",
+								Toast.LENGTH_LONG).show();
+						return;
+					}
+					catch (Exception e)
+					{
+						Log.e("[CameraActivity]", "Can't change picture resolution");
+					}
+				}
+			}
+		}
+	}
+
+	// change size of picture to take
+	public void changePictureSize()
+	{
+		Camera.Size size = mCameraParams.getPictureSize();
+		for (int i = 0; i < lists.length; i++)
+		{
+			for (Camera.Size s : lists[i])
+			{
+				if (s.equals(size))
+				{
+					try
+					{
+						int index = (lists[i].indexOf(s) + 1) % lists[i].size();
+						currentSize = lists[i].get(index);
+						mCameraParams.setPictureSize(currentSize.width, currentSize.height);
+						mCamera.setParameters(mCameraParams);
+						int gcd = BigInteger.valueOf(currentSize.width).gcd(BigInteger.valueOf(currentSize.height)).intValue();
+
+						Toast.makeText(
+								mContext,
+								"Aspect Ratio (" + currentSize.width / gcd + "*" + currentSize.height / gcd + ") Resolution (" + currentSize.width
+										+ "*" + currentSize.height + ")", Toast.LENGTH_LONG).show();
+						return;
+					}
+					catch (Exception e)
+					{
+						Log.e("[CameraActivity]", "Can't change picture size");
+					}
+				}
+			}
+		}
+	}
+
+	// calculates cameras resolution capabilities and builds array of them
+	private void setPictureSizeArrays()
+	{
+		List<Camera.Size> pictureSizes = mCameraParams.getSupportedPictureSizes();
+
+		int length = 0;
+		int index = -1;
+		double prevMegapixels = 0;
+		for (Size size : pictureSizes)
+		{
+			double megaPixels = Math.ceil((double) size.width * size.height / (double) 1000000);
+			if (megaPixels != prevMegapixels)
+			{
+				length++;
+				prevMegapixels = megaPixels;
+			}
+		}
+		prevMegapixels = 0;
+		// Log.d("length", length + "");
+
+		lists = (ArrayList<Camera.Size>[]) new ArrayList[length];
+
+		for (Size size : pictureSizes)
+		{
+			int gcd = BigInteger.valueOf(size.width).gcd(BigInteger.valueOf(size.height)).intValue();
+			double megaPixels = Math.ceil((double) size.width * size.height / (double) 1000000);
+			if (prevMegapixels != megaPixels && index < length)
+			{
+				index++;
+				lists[index] = new ArrayList<Camera.Size>();
+				lists[index].add(size);
+				prevMegapixels = megaPixels;
+			}
+			else if (prevMegapixels == megaPixels && index < length)
+			{
+				lists[index].add(size);
+			}
+
+			Log.i("@@@@@@@@@@@@@", "PICTURES SIZES " + Math.ceil((double) size.width * size.height / (double) 1000000) + " ASPECT RATIO "
+					+ size.width / gcd + " | " + size.height / gcd + " PIXELS " + size.width + " | " + size.height);
+		}
+		currentSize = lists[0].get(0);
+		for (int i = 0; i < lists.length; i++)
+		{
+			try
+			{
+				System.out.println(i);
+				for (Camera.Size size : lists[i])
+				{
+					System.out.println(size.width + "," + size.height);
+				}
+			}
+			catch (Exception e)
+			{
+				System.out.println("NULL");
+			}
+		}
+	}
+
+	// after taking picture - returns to preview mode
+	public void retake()
+	{
+		try
+		{
+			Thread.sleep(500);
+
+			Camera.Size previewSize = mCameraParams.getSupportedPreviewSizes().get(0);
+
+			mCameraParams.setPictureSize(currentSize.width, currentSize.height);
+			mCameraParams.setPreviewSize(previewSize.width, previewSize.height);
+			mCameraParams.set("rotation", 90);
+			mCameraParams.setPictureFormat(PixelFormat.JPEG);
+
+			if (isFront)
+				mCamera = Camera.open(Camera.CameraInfo.CAMERA_FACING_FRONT);
+			else 
+				mCamera = Camera.open();
+		}
+
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			((Activity) mContext).finish();
+			return;
+		}
+<<<<<<< HEAD
+=======
+
+		mCamera.setParameters(mCameraParams);
+		Camera.Size previewSize = mCameraParams.getSupportedPreviewSizes().get(0);
+>>>>>>> 3ad3a462bfb0de81f0f8b6dcac813000faea7568
+
+		// mCamera.setParameters(mCameraParams);
+		mCamera.setDisplayOrientation(90);
+
+		try
+		{
+			mCamera.setPreviewDisplay(mSurfaceHolder);
+		}
+		catch (Throwable ignored)
+		{
+			Log.e(TAG, "set preview error.", ignored);
+		}
+
+		stopPreview();
+
+		try
+		{
+			startPreview();
+		}
+
+		catch (Exception e)
+		{
+			Log.d(TAG, "Cannot start preview", e);
+		}
+		if (bwImage)
+			changeWhiteBalanceMode(5);
+		mPreviewRunning = true;
+	}
+
+	private Camera.Size getBestPreviewSize(int width, int height)
+	{
+		Camera.Size result = null;
+		Camera.Parameters p = mCamera.getParameters();
+		for (Camera.Size size : p.getSupportedPreviewSizes())
+		{
+			if (size.width <= width && size.height <= height)
+			{
+				if (result == null)
+				{
+					result = size;
+				}
+				else
+				{
+					int resultArea = result.width * result.height;
+					int newArea = size.width * size.height;
+
+					if (newArea > resultArea)
+					{
+						result = size;
+					}
+				}
+			}
+		}
+		return result;
+	}
+
+	private Camera.Size getBestPictureSize(int width, int height)
+	{
+		Camera.Size result = null;
+
+		Camera.Parameters p = mCamera.getParameters();
+
+		for (Camera.Size size : p.getSupportedPictureSizes())
+		{
+			if (size.width <= width && size.height <= height)
+			{
+				if (result == null)
+				{
+					result = size;
+				}
+				else
+				{
+					int resultArea = result.width * result.height;
+					int newArea = size.width * size.height;
+
+					if (newArea > resultArea)
+					{
+						result = size;
+					}
+				}
+			}
+		}
+		return result;
+	}
+
+	// store image on sdcard
+	public boolean StoreByteImage(Context mContext, byte[] imageData, int quality, String expName, int rotation)
+	{
+		Bitmap bitmap = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
+
+		if (bitmap != null)
+		{
+
+			File folder = new File(Environment.getExternalStorageDirectory() + "/DCIM");
+
+			if (!folder.exists())
+			{
+				folder.mkdir();
+			}
+
+			long lDateTime = new Date().getTime();
+			File photo = new File(folder, lDateTime + "photo.jpg");
+
+			try
+			{
+				FileOutputStream fos = new FileOutputStream(photo.getPath());
+
+				fos.write(imageData);
+				fos.close();
+			}
+
+			catch (java.io.IOException e)
+			{
+				Log.e("PictureDemo", "Exception in photoCallback", e);
+			}
+
+			galleryAddPic(photo);
+			((Activity) mContext).setResult(Activity.RESULT_OK);
+		}
+
+		return true;
+	}
+
+	// saves pic to gallery
+	private void galleryAddPic(File f)
+	{
+		Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+		Uri contentUri = Uri.fromFile(f);
+		mediaScanIntent.setData(contentUri);
+		mContext.sendBroadcast(mediaScanIntent);
+	}
+
+	// zoom camera (depends on if and how camera zooms)
+	public void zoomView(int zoom)
+	{
+		int maxZoom = mCameraParams.getMaxZoom();
+		Log.i(TAG, "max zoom " + maxZoom);
+		if (mCameraParams.isZoomSupported())
+		{
+			mCameraParams.setZoom((mCameraParams.getZoom() + 1) % (mCameraParams.getMaxZoom() + 1));
+			mCamera.setParameters(mCameraParams);
+		}
+		else
+		{
+			Log.i(TAG, "zoom not suported " + mCameraParams.isZoomSupported());
+		}
+	}
+
+	// switch camera (0 - front ,1 - back)
+	public void switchCamera(int direction)
+	{
+		if ((isFront && direction == 1) || (!isFront && direction == 0))
+			return;
+
+		stopPreview();
+		try
+		{
+			if (isFront == false)
+			{
+				mCamera = Camera.open(Camera.CameraInfo.CAMERA_FACING_FRONT);
+				isFront = true;
+				Parameters mCameraParamsTemp = mCamera.getParameters();
+				Camera.Size pictureSize = mCameraParams.getSupportedPictureSizes().get(0);
+				Camera.Size previewSize = mCameraParams.getSupportedPreviewSizes().get(0);
+<<<<<<< HEAD
+
+=======
+>>>>>>> 3ad3a462bfb0de81f0f8b6dcac813000faea7568
+				mCameraParams.setPictureSize(pictureSize.width, pictureSize.height);
+				mCameraParams.setPreviewSize(previewSize.width, previewSize.height);
+				mCamera.setParameters(mCameraParamsTemp);
+			}
+
+			else
+			{
+				mCamera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK);
+				isFront = false;
+				// mCameraParams = mCamera.getParameters();
+				Camera.Size previewSize = mCameraParams.getSupportedPreviewSizes().get(0);
+				mCameraParams.setPreviewSize(previewSize.width, previewSize.height);
+				mCameraParams.setPictureSize(currentSize.width, currentSize.height);
+				mCamera.setParameters(mCameraParams);
+			}
+
+			mCameraParams.set("rotation", 90);
+			mCameraParams.setPictureFormat(PixelFormat.JPEG);
+			// mCameraParams.set("flash-mode", "auto");
+
+			mCamera.setDisplayOrientation(90);
+
+			mCamera.setPreviewDisplay(mSurfaceHolder);
+
+			startPreview();
+
+			mPreviewRunning = true;
+		}
+
+		catch (Exception e)
+		{
+			((Activity) mContext).finish();
+		}
+	}
+
+	public void changeColorEffect(int colorMode)
+	{
+		ArrayList<String> colorEffects = (ArrayList<String>) mCameraParams.getSupportedColorEffects();
+
+		if (colorEffects.size() > 0)
+		{
+			mCameraParams.setColorEffect(colorEffects.get(colorMode));
+
+			mCamera.setParameters(mCameraParams);
+
+			Toast.makeText(mContext, "Color effect: " + colorEffects.get(colorMode), Toast.LENGTH_SHORT).show();
+		}
+
+		else
+		{
+			Toast.makeText(mContext, "there is no color support", Toast.LENGTH_SHORT).show();
+		}
+	}
+
+	// private int focusMode = 0;
+
+	public void changeFocusMode(int focusMode)
+	{
+		ArrayList<String> focusModes = (ArrayList<String>) mCameraParams.getSupportedFocusModes();
+
+		if (focusModes.size() > 0)
+		{
+			mCameraParams.setFocusMode(focusModes.get(focusMode));
+
+			mCamera.setParameters(mCameraParams);
+
+			Toast.makeText(mContext, "Focus mode: " + focusModes.get(focusMode), Toast.LENGTH_SHORT).show();
+		}
+
+		else
+		{
+			Toast.makeText(mContext, "there is no focus support", Toast.LENGTH_SHORT).show();
+		}
+	}
+
+	// Change color effects (sepia, black-white, negative, etc...)
+	// private int whiteBalanceMode = 0;
+
+	public void changeWhiteBalanceMode(int wbMode)
+	{
+		if (isFront)
+		{
+			Toast.makeText(mContext, "there are no effects in the front camera", Short.SIZE).show();
+			return;
+		}
+		ArrayList<String> whiteBalance = (ArrayList<String>) mCameraParams.getSupportedWhiteBalance();
+
+		if (wbMode == 5)
+		{
+			bwImage = true;
+			mCameraParams.setColorEffect("mono");
+			mCamera.setParameters(mCameraParams);
+			Toast.makeText(mContext, "WB mode: Black & White", Toast.LENGTH_SHORT).show();
+		}
+		else if (whiteBalance.size() > 0)
+		{
+<<<<<<< HEAD
+			ArrayList<String> colorEffects = (ArrayList<String>) mCameraParams.getSupportedColorEffects();
+			mCameraParams.setColorEffect(colorEffects.get(0));
+			bwImage = false;
+			;
+=======
+			mCameraParams.setColorEffect("auto");
+>>>>>>> 3ad3a462bfb0de81f0f8b6dcac813000faea7568
+			mCameraParams.setWhiteBalance(whiteBalance.get(wbMode));
+
+			mCamera.setParameters(mCameraParams);
+
+			Toast.makeText(mContext, "WB mode: " + whiteBalance.get(wbMode), Toast.LENGTH_SHORT).show();
+		}
+
+		else
+		{
+			Toast.makeText(mContext, "there is no color support", Toast.LENGTH_SHORT).show();
+		}
+	}
+
+	// Change flash mode (on, off etc..)
+	// private int flashMode = 0;
+
+	public void changeFlashMode(int flashMode)
+	{
+		if (isFront)
+		{
+			Toast.makeText(mContext, "there is no flash in the front camera", Short.SIZE).show();
+			return;
+		}
+
+		ArrayList<String> flashModes = (ArrayList<String>) mCameraParams.getSupportedFlashModes();
+
+		if (flashModes.size() > 0)
+		{
+			mCameraParams.setFlashMode(flashModes.get(flashMode));
+
+			mCamera.setParameters(mCameraParams);
+
+			Toast.makeText(mContext, "Flash mode: " + flashModes.get(flashMode), Toast.LENGTH_SHORT).show();
+		}
+
+		else
+		{
+			Toast.makeText(mContext, "there is no flash support", Toast.LENGTH_SHORT).show();
+		}
+	}
+
+	private int previewSize = 0;
+
+	private void changePreviewSize()
+	{
+		ArrayList<Camera.Size> previewSizes = (ArrayList<Camera.Size>) mCameraParams.getSupportedPreviewSizes();
+
+		if (previewSizes.size() > 0)
+		{
+			if (previewSize == previewSizes.size() - 1)
+			{
+				previewSize = 0;
+			}
+
+			else
+			{
+				previewSize++;
+			}
+
+			mCameraParams.setPreviewSize(previewSizes.get(previewSize).width, previewSizes.get(previewSize).height);
+
+			mCamera.setParameters(mCameraParams);
+
+			Toast.makeText(mContext, "Preview size: " + previewSizes.get(previewSize).width + "X" + previewSizes.get(previewSize).height,
+					Toast.LENGTH_SHORT).show();
+		}
+
+		else
+		{
+			Toast.makeText(mContext, "there is no preview sizes support", Toast.LENGTH_SHORT).show();
+		}
+	}
+}
